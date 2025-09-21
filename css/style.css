@@ -1,0 +1,58 @@
+/* basic page + board */
+body {
+    user-select: none;
+
+    background: #1e1e1e;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.board {
+    border-collapse: collapse;
+    margin: 32px auto;
+}
+
+.board td {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #555;
+    text-align: center;
+}
+
+
+
+
+
+
+/* cells */
+.cell {
+    caret-color: transparent;
+}
+
+.cell:focus {
+    outline: none;
+}
+
+.cell:hover {
+    background: #2b2b2b;
+}
+
+.cell.revealed {
+    background: #2b2b2b;
+}
+
+
+
+footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 8px 12px;
+    background: #111;
+    color: #ccc;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+}
