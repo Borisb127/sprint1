@@ -21,6 +21,11 @@ body {
 }
 
 
+/* header */
+.title {
+    font-size: 24px;
+    margin-top: 20px;
+}
 
 
 
@@ -42,8 +47,87 @@ body {
     background: #2b2b2b;
 }
 
+.cell.hit {
+    background: #5a1f1f;
+}
 
 
+
+/* modal */
+.modal {
+    position: fixed;
+    inset: 0;
+    /* full screen */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+    /* dim background */
+    backdrop-filter: blur(4px);
+    /* soft blur behind */
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 99999;
+    /* on top of everything */
+}
+
+.modal.hidden {
+    display: none;
+}
+
+
+.modal-box {
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, #222 0%, #191919 100%);
+    color: #fff;
+    padding: 16px 20px;
+    box-shadow:
+        0 0 36px rgba(201, 71, 71, 0.55),
+        inset 0 1px 0 rgba(209, 69, 69, 0.04);
+    min-width: 240px;
+}
+
+
+.modal .modal-msg {
+    margin: 0 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 12px 16px;
+    background: #222;
+    color: #fff;
+    font-size: 18px;
+}
+
+.modal .modal-ok {
+    border: 0;
+    border-radius: 10px;
+    padding: 8px 16px;
+    background: #d63030;
+    color: #111;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.modal .modal-ok:hover {
+    filter: brightness(1.06);
+}
+
+
+
+
+
+
+
+.panel .panel-middle {
+
+    font-size: 18px;
+}
+
+
+
+
+
+/* footer */
 footer {
     position: fixed;
     left: 0;

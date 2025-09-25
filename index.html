@@ -9,10 +9,39 @@
 
 <body onload="onInit()">
 
-	<h1></h1>
+	<h1 class="title">Minesweeper</h1>
+
+	<div class="panel">
+
+		<span class="marked">
+			Marked: <span class="marked-count">0</span>
+		</span>
+		<div class="panel-middle">
+			<span class="smiley" onclick="onInit()">
+				😊
+			</span>
+			<span class="lives">
+				<span class="lives-count"></span>
+			</span>
+		</div>
+		<span class="timer">
+			Time: <span class="time-count">00:00</span>
+		</span>
+
+	</div>
+
+
 	<table class="board">
 		<tbody></tbody>
 	</table>
+
+
+	<div class="modal">
+		<div class="modal-box">
+			<p class="modal-msg"></p>
+			<button class="modal-ok" onclick="onModalOk()">OK</button>
+		</div>
+	</div>
 
 
 
