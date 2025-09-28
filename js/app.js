@@ -1,11 +1,16 @@
 'use strict'
 
 
-
+var gHistory = []
 var gBoard
 var gLevel = {
     SIZE: 4,
     MINES: 3
+}
+const LEVELS = {
+    easy: { SIZE: 4, MINES: 2 },
+    medium: { SIZE: 8, MINES: 12 },
+    hard: { SIZE: 12, MINES: 30 }
 }
 var gGame = {
     isOn: false,
@@ -16,7 +21,9 @@ var gGame = {
 }
 var gLives = 3
 var gModalTimeoutId = null
-var gTimeId = null
+
+var gStartTime
+var gTimerIntervalId
 
 
 
@@ -27,7 +34,7 @@ function onInit() {
         gModalTimeoutId = null
     }
 
-
+    gHistory = [] // clear undo history 
     gGame = {
         isOn: true,
         revealedCount: 0,
@@ -36,7 +43,7 @@ function onInit() {
         firstClick: true
     }
 
-    var modal = document.querySelector('.modal')
+    const modal = document.querySelector('.modal')
     modal.classList.add('hidden')
 
     gBoard = buildBoard(gLevel.SIZE)
@@ -46,9 +53,14 @@ function onInit() {
     //setMinesNegsCount(gBoard)
 
     gLives = 3
-    var elSmiley = document.querySelector('.smiley')
+    const elSmiley = document.querySelector('.smiley')
     elSmiley.textContent = '😊'
+    const elTimer = document.querySelector('.time-count')
+    elTimer.innerText = '00:00'
+    clearInterval(gTimerIntervalId) // in case already running
     renderLives()
+    renderMarkedCount()
+
 
     debugPrint(gBoard)
     renderBoard(gBoard)
@@ -65,7 +77,25 @@ function createCell() {
 }
 
 
+function setLevel(level) {
+    console.log('level:', level)
 
+
+    gLevel.SIZE = LEVELS[level].SIZE
+    gLevel.MINES = LEVELS[level].MINES
+
+    const elLevelBtns = document.querySelectorAll('.level-btn')
+    elLevelBtns.forEach(function (btn) {
+        var key = btn.textContent.toLowerCase().trim()
+        if (key === level) {
+            btn.classList.add('active')
+        } else {
+            btn.classList.remove('active')
+        }
+    })
+
+    onInit()
+}
 
 ////////////////////BOARD LOGIC
 
@@ -102,7 +132,6 @@ function renderBoard(board) {
 
             var val = getCellText(cell)
 
-
             strHTML += `<td class="cell ${cell.isRevealed ? 'revealed' : ''}
                                          ${cell.isMarked ? 'marked' : ''}"
                             data-i="${i}"
@@ -137,6 +166,7 @@ function onCellClicked(elCell, i, j) {
         placeMines(gBoard, gLevel.MINES, i, j)
         // placeMinesStatic(gBoard)
         setMinesNegsCount(gBoard)
+        onStartTimer() // start timer on first click
         debugPrint(gBoard)
         gGame.firstClick = false
         console.log('first click')
@@ -184,6 +214,8 @@ function onCellClicked(elCell, i, j) {
         gGame.revealedCount++
 
         expandReveal(gBoard, i, j)
+        renderMarkedCount()
+
         renderBoard(gBoard)
         checkGameOver()
         return
@@ -256,6 +288,8 @@ function onCellMarked(event, elCell, i, j) {
         ? elCell.classList.add('marked')
         : elCell.classList.remove('marked')
     elCell.textContent = getCellText(cell)
+
+    renderMarkedCount()
     checkGameOver()
 
 }
@@ -350,6 +384,7 @@ function checkGameOver() {
         elSmiley.textContent = '😵'
         revealAllMines(gBoard)
         renderBoard(gBoard)
+        onStopTimer()
 
         gModalTimeoutId = setTimeout(function () {
             showModal('You Lost!')
@@ -380,6 +415,7 @@ function checkGameOver() {
 
     if (allMinesMarked && allSafeRevealed) {
         gGame.isOn = false
+        onStopTimer()
         elSmiley.textContent = '😎'
 
         gModalTimeoutId = setTimeout(function () {
@@ -412,6 +448,50 @@ function onModalOk() {
 
 
 
+////////////////////MARKED BOX LOGIC
+function renderMarkedCount() {
+    var elMarkedSpan = document.querySelector('.marked-count')
+    elMarkedSpan.innerText = gGame.markedCount
+}
+
+////////////////////TIMER BOX LOGIC
+function onStartTimer() {
+    //console.log('Timer started')
+
+    gStartTime = new Date()
+
+    clearInterval(gTimerIntervalId) // in case already running
+    gTimerIntervalId = setInterval(updateTimer, 1000)
+}
 
 
-////////////////////TIMER LOGIC
+function updateTimer() {
+    var elapsedSec = Math.floor((Date.now() - gStartTime) / 1000)
+    var seconds = elapsedSec % 60
+    var minutes = Math.floor(elapsedSec / 60)
+
+    // console.log('sec', seconds)
+    // console.log('min', minutes)
+
+    // add zero at start
+    var mm = String(minutes).padStart(2, '0')
+    var ss = String(seconds).padStart(2, '0')
+
+
+    const elTimer = document.querySelector('.time-count')
+    elTimer.innerText = `${mm}:${ss}`
+    gGame.secsPassed = elapsedSec
+    // elTimer.innerText = `00:${(diff / 1000).toFixed(0)}`
+}
+
+function onStopTimer() {
+    console.log('Timer stopped')
+    clearInterval(gTimerIntervalId) // in case already running
+}
+
+
+
+////////////////////UNDO LOGIC
+function onUndo() {
+    console.log('Undo clicked')
+}
