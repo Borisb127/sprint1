@@ -9,6 +9,12 @@
 
 <body onload="onInit()">
 
+
+
+	<!-- DARK MODE TOGGLE -->
+	<button class="mode-toggle-btn" onclick="onToggleDarkMode()">Light Mode</button>
+
+
 	<!-- TITLE + PANEL -->
 	<h1 class="title">Minesweeper</h1>
 
@@ -43,10 +49,9 @@
 		<button class="level-btn" onclick="setLevel('hard')">Hard</button>
 	</div>
 
-	<button class="undo-btn" onclick="onUndo()">↩</button>
+	<!-- <button class="undo-btn" onclick="onUndo()">↩</button> -->
 
 	<!-- GAME BOARD -->
-
 	<table class="board">
 		<tbody></tbody>
 	</table>
@@ -60,6 +65,15 @@
 	</div>
 
 
+
+	<!-- BEST SCORE PANEL -->
+	<div class="stats-panel">
+		<span class="panel-label">Best:</span>
+		<span class="best-score"></span>
+	</div>
+	<button class="reset-score" onclick="onResetBestScores()">🗑️</button>
+
+	<!-- FOOTER -->
 	<footer>
 		© 2025 Boris Borochov
 	</footer>

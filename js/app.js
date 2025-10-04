@@ -5,7 +5,7 @@ var gHistory = []
 var gBoard
 var gLevel = {
     SIZE: 4,
-    MINES: 3
+    MINES: 2
 }
 const LEVELS = {
     easy: { SIZE: 4, MINES: 2 },
@@ -60,7 +60,7 @@ function onInit() {
     clearInterval(gTimerIntervalId) // in case already running
     renderLives()
     renderMarkedCount()
-
+    updateBestScore()
 
     debugPrint(gBoard)
     renderBoard(gBoard)
@@ -131,14 +131,20 @@ function renderBoard(board) {
             var cell = board[i][j]
 
             var val = getCellText(cell)
+            var numClass = ''
+            if (cell.isRevealed && !cell.isMine && cell.minesAroundCount > 0) {
+                numClass = 'num-' + cell.minesAroundCount
+            }
+
 
             strHTML += `<td class="cell ${cell.isRevealed ? 'revealed' : ''}
-                                         ${cell.isMarked ? 'marked' : ''}"
-                            data-i="${i}"
-                            data-j="${j}"
-                            onclick="onCellClicked(this, ${i}, ${j})"
-                            oncontextmenu="onCellMarked(event, this, ${i}, ${j})"
-                            >${val}</td>`
+                                        ${cell.isMarked ? 'marked' : ''}
+                                        ${numClass}"
+                                        data-i="${i}"
+                                        data-j="${j}"
+                                        onclick="onCellClicked(this, ${i}, ${j})"
+                                        oncontextmenu="onCellMarked(event, this, ${i}, ${j})"
+                                        >${val}</td>`
         }
         strHTML += '</tr>'
     }
@@ -187,47 +193,42 @@ function onCellClicked(elCell, i, j) {
 
         const elSmiley = document.querySelector('.smiley')
         elSmiley.textContent = '😵'
-
-
-        if (gLives === 0) {
-            checkGameOver()
-        }
-
         elCell.classList.add('hit')
         elCell.textContent = '💣'
 
-        setTimeout(function () {
-            if (!gGame.isOn) return
-            elSmiley.textContent = '😊'
-            elCell.classList.remove('hit')
-            elCell.textContent = ''
-        }, 800)
+        if (gLives === 0) {
+            checkGameOver()
+        } else
 
+            setTimeout(function () {
+                if (!gGame.isOn) return
+                elSmiley.textContent = '😊'
+                elCell.classList.remove('hit')
+                elCell.textContent = ''
+            }, 800)
         return
     }
 
 
-
-    // if cell has no neighboring mines, expand:
-    if (cell.minesAroundCount === 0) {
-        cell.isRevealed = true
-        gGame.revealedCount++
-
-        expandReveal(gBoard, i, j)
-        renderMarkedCount()
-
-        renderBoard(gBoard)
-        checkGameOver()
-        return
-    }
-
-
+    // 1. Reveal the cell
     cell.isRevealed = true
     gGame.revealedCount++
 
-    elCell.classList.add('revealed')
-    elCell.textContent = getCellText(cell)
+    // 2. Handle zero-neighbor expansion
+    if (cell.minesAroundCount === 0) {
+
+        expandReveal(gBoard, i, j)
+    }
+
+    // 3. Update the whole board
+    renderBoard(gBoard)
+
+    // 4. Update the display for marked count
+    renderMarkedCount()
+
+    // 5. Check for win/lose
     checkGameOver()
+
 }
 
 
@@ -259,8 +260,11 @@ function expandReveal(board, cellI, cellJ) {
 
 
             if (neighbor.isRevealed || neighbor.isMine) continue
-            if (neighbor.isMarked) gGame.markedCount-- // decrease marked count 
 
+            if (neighbor.isMarked) {
+                neighbor.isMarked = false // unmark the cell in the model
+                gGame.markedCount-- // decrease marked count 
+            }
             // reveal this neighbor
             neighbor.isRevealed = true
             gGame.revealedCount++
@@ -418,6 +422,24 @@ function checkGameOver() {
         onStopTimer()
         elSmiley.textContent = '😎'
 
+        // Check and save Best Score
+        const key = 'bestScore-' + gLevel.SIZE;
+        const currentBestTimeStr = localStorage.getItem(key)
+        var isNewBest = true
+        if (currentBestTimeStr) {
+            const currentBestTime = parseInt(currentBestTimeStr)
+            if (gGame.secsPassed >= currentBestTime) {
+                isNewBest = false
+            }
+        }
+        if (isNewBest) {
+            localStorage.setItem(key, gGame.secsPassed)
+        }
+        updateBestScore()
+
+
+
+
         gModalTimeoutId = setTimeout(function () {
             showModal('You Win!')
             gModalTimeoutId = null
@@ -494,4 +516,52 @@ function onStopTimer() {
 ////////////////////UNDO LOGIC
 function onUndo() {
     console.log('Undo clicked')
+}
+
+
+
+
+
+////////////////////TOGGLE DARK/LIGHT MODE LOGIC
+function onToggleDarkMode() {
+    console.log('toggle clicked')
+    document.body.classList.toggle('light-mode')
+
+    const elBtn = document.querySelector('.mode-toggle-btn')
+    if (document.body.classList.contains('light-mode')) {
+        elBtn.textContent = 'Dark Mode'
+    } else {
+        elBtn.textContent = 'Light Mode'
+    }
+}
+
+
+
+////////////////////BEST SCORE LOGIC
+function updateBestScore() {
+    const elBestScore = document.querySelector('.best-score')
+
+    const key = 'bestScore-' + gLevel.SIZE
+    const bestTimeStr = localStorage.getItem(key)
+    console.log(key)
+
+    if (!bestTimeStr) {
+        elBestScore.innerText = '--:--'
+    } else {
+        const bestTimeSec = parseInt(bestTimeStr)
+        const mm = String(Math.floor(bestTimeSec / 60)).padStart(2, '0')
+        const ss = String(bestTimeSec % 60).padStart(2, '0')
+        elBestScore.innerText = `${mm}:${ss}`
+    }
+}
+
+
+function onResetBestScores() {
+    console.log('Reset Best Scores clicked')
+    
+    localStorage.removeItem('bestScore-4')
+    localStorage.removeItem('bestScore-8')
+    localStorage.removeItem('bestScore-12')
+    onStopTimer()
+    onInit()
 }
